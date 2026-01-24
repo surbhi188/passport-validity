@@ -59,35 +59,51 @@ button {
   background: #f8d7da;
   color: #721c24;
 }
+
+.hidden {
+  display: none;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<h2>Passport Validity Checker</h2>
 
-<label>Entered By</label>
-<input type="text" id="enteredBy" required>
+<!-- STEP 1 -->
+<div id="step1">
+  <h2>Enter Your Name</h2>
 
-<label>First Name</label>
-<input type="text" id="firstName" required>
+  <label>Entered By</label>
+  <input type="text" id="enteredBy">
 
-<label>Last Name</label>
-<input type="text" id="lastName" required>
+  <button onclick="goToStep2()">Continue</button>
+</div>
 
-<label>Passport Number</label>
-<input type="text" id="passportNumber" required>
+<!-- STEP 2 -->
+<div id="step2" class="hidden">
+  <h2>Passport Validity Checker</h2>
 
-<label>Travel Date</label>
-<input type="date" id="travelDate">
+  <label>First Name</label>
+  <input type="text" id="firstName">
 
-<label>Passport Expiry Date</label>
-<input type="date" id="expiryDate" required>
+  <label>Last Name</label>
+  <input type="text" id="lastName">
 
-<button onclick="checkAndSave()">Check & Save</button>
+  <label>Passport Number</label>
+  <input type="text" id="passportNumber">
 
-<div id="result" class="result"></div>
+  <label>Travel Date</label>
+  <input type="date" id="travelDate">
+
+  <label>Passport Expiry Date</label>
+  <input type="date" id="expiryDate">
+
+  <button onclick="checkAndSave()">Check & Save</button>
+
+  <div id="result" class="result"></div>
+</div>
+
 </div>
 
 <script>
@@ -98,12 +114,24 @@ const SCRIPT_URL =
 document.getElementById("travelDate").value =
   new Date().toISOString().split("T")[0];
 
+function goToStep2() {
+  const enteredBy = document.getElementById("enteredBy").value.trim();
+
+  if (!enteredBy) {
+    alert("Please enter your name");
+    return;
+  }
+
+  document.getElementById("step1").classList.add("hidden");
+  document.getElementById("step2").classList.remove("hidden");
+}
+
 function checkAndSave() {
 
   const result = document.getElementById("result");
 
-  const travelDateVal = document.getElementById("travelDate").value;
-  const expiryDateVal = document.getElementById("expiryDate").value;
+  const travelDateVal = travelDate.value;
+  const expiryDateVal = expiryDate.value;
 
   if (!expiryDateVal) {
     result.textContent = "Please enter passport expiry date";
@@ -111,16 +139,16 @@ function checkAndSave() {
     return;
   }
 
-  const travelDate = new Date(travelDateVal);
-  const expiryDate = new Date(expiryDateVal);
+  const travelDateObj = new Date(travelDateVal);
+  const expiryDateObj = new Date(expiryDateVal);
 
-  const requiredDate = new Date(travelDate);
+  const requiredDate = new Date(travelDateObj);
   requiredDate.setMonth(requiredDate.getMonth() + 6);
 
   const validity =
-    expiryDate >= requiredDate ? "VALID" : "INVALID";
+    expiryDateObj >= requiredDate ? "VALID" : "INVALID";
 
-  // Show result immediately (NO dependency on fetch)
+  // Show result immediately
   if (validity === "VALID") {
     result.textContent = "Passport is VALID ✅ (Data saved)";
     result.className = "result valid";
@@ -129,7 +157,7 @@ function checkAndSave() {
     result.className = "result invalid";
   }
 
-  // Fire-and-forget data save (CORS-safe)
+  // Fire-and-forget save
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
@@ -147,7 +175,6 @@ function checkAndSave() {
       timestamp: new Date().toISOString()
     })
   });
-
 }
 </script>
 
