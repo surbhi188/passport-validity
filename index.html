@@ -161,7 +161,18 @@ function checkAndSave() {
     method: "POST",
     mode: "no-cors",
     body: formData
-  });
+  })
+    .then(res => res.json())
+.then(data => {
+  if (data.status === "success") {
+    alert("Data saved successfully ✅");
+  } else {
+    alert("Save failed ❌\n" + data.message);
+  }
+})
+.catch(err => {
+  alert("Network error ❌\n" + err);
+});
 
   alert("Data saved successfully ✅");
 
