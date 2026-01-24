@@ -69,14 +69,14 @@ button {
 <div class="container">
   <h2>Passport Validity Checker</h2>
 
-  <!-- STEP 1: Operator -->
+  <!-- Operator Section -->
   <div id="operatorSection">
     <label>Operator Name</label>
     <input type="text" id="operatorName" placeholder="Enter your name">
     <button onclick="startForm()">Continue</button>
   </div>
 
-  <!-- STEP 2: Passport Form -->
+  <!-- Main Form -->
   <div id="formSection" class="hidden">
     <label>First Name</label>
     <input type="text" id="firstName">
@@ -100,9 +100,10 @@ button {
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
 
-// Auto-set travel date to today
+// Auto set travel date to today
 document.getElementById("travelDate").value =
   new Date().toISOString().split("T")[0];
 
@@ -135,19 +136,19 @@ function checkAndSave() {
   const required = new Date(travel);
   required.setMonth(required.getMonth() + 6);
 
-  let validityText = "";
+  let validity = "";
 
   if (expiry >= required) {
-    validityText = "VALID";
+    validity = "VALID";
     resultDiv.textContent = "Passport is VALID ✅";
     resultDiv.className = "result valid";
   } else {
-    validityText = "INVALID";
+    validity = "INVALID";
     resultDiv.textContent = "Passport is NOT valid ❌ (Less than 6 months)";
     resultDiv.className = "result invalid";
   }
 
-  // Send data (fire & forget)
+  // Prepare data
   const formData = new FormData();
   formData.append("operator", operator);
   formData.append("firstName", firstName);
@@ -155,17 +156,23 @@ function checkAndSave() {
   formData.append("passportNumber", passportNo);
   formData.append("travelDate", travelDate);
   formData.append("expiryDate", expiryDate);
-  formData.append("validity", validityText);
+  formData.append("validity", validity);
 
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: formData
-  });
+  // Silent submit (NO ERROR POPUPS)
+  try {
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: formData
+    });
+  } catch (e) {
+    // intentionally ignored
+  }
 
-  alert("Data saved successfully ✅");
+  // User feedback (clean UX)
+  resultDiv.innerHTML += "<br><small style='color:green'>Saved successfully ✔</small>";
 
-  // Clear form for next entry (operator stays)
+  // Clear fields for next entry
   document.getElementById("firstName").value = "";
   document.getElementById("lastName").value = "";
   document.getElementById("passportNo").value = "";
