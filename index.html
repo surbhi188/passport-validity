@@ -6,65 +6,54 @@
 
 <style>
 body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    padding: 40px;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 40px;
 }
 
 .container {
-    background: #ffffff;
-    padding: 25px;
-    max-width: 500px;
-    margin: auto;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  background: #ffffff;
+  padding: 25px;
+  max-width: 500px;
+  margin: auto;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 label {
-    display: block;
-    margin-top: 12px;
-    font-weight: bold;
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
 }
 
 input, button {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
 }
 
 button {
-    margin-top: 15px;
-    cursor: pointer;
-}
-
-.hidden {
-    display: none;
+  margin-top: 20px;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .result {
-    margin-top: 15px;
-    padding: 10px;
-    font-weight: bold;
-    text-align: center;
-    border-radius: 5px;
+  margin-top: 15px;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 5px;
 }
 
 .valid {
-    background: #d4edda;
-    color: #155724;
+  background: #d4edda;
+  color: #155724;
 }
 
 .invalid {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.operator-tag {
-    background: #eef2ff;
-    padding: 8px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    font-weight: bold;
+  background: #f8d7da;
+  color: #721c24;
 }
 </style>
 </head>
@@ -72,116 +61,83 @@ button {
 <body>
 
 <div class="container">
-    <h2>Passport Validity Checker</h2>
+<h2>Passport Validity Checker</h2>
 
-    <!-- Operator Input -->
-    <label>Operator Name</label>
-    <input type="text" id="operatorName" placeholder="Enter your name">
-    <button id="startBtn">Continue</button>
+<label>Entered By</label>
+<input type="text" id="enteredBy">
 
-    <!-- Passport Form -->
-    <div id="formSection" class="hidden">
+<label>First Name</label>
+<input type="text" id="firstName">
 
-        <div class="operator-tag">
-            Operator: <span id="operatorDisplay"></span>
-        </div>
+<label>Last Name</label>
+<input type="text" id="lastName">
 
-        <label>First Name</label>
-        <input type="text" id="firstName">
+<label>Passport Number</label>
+<input type="text" id="passportNumber">
 
-        <label>Last Name</label>
-        <input type="text" id="lastName">
+<label>Travel Date</label>
+<input type="date" id="travelDate">
 
-        <label>Passport Number</label>
-        <input type="text" id="passportNo">
+<label>Passport Expiry Date</label>
+<input type="date" id="expiryDate">
 
-        <label>Travel Date</label>
-        <input type="date" id="travelDate">
+<button onclick="checkAndSave()">Check & Save</button>
 
-        <label>Passport Expiry Date</label>
-        <input type="date" id="expiryDate">
-
-        <button id="checkBtn">Check & Save</button>
-
-        <div id="result" class="result"></div>
-    </div>
+<div id="result" class="result"></div>
 </div>
 
 <script>
-// ✅ Your Apps Script URL
-const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
 
-let operator = "";
-
-// Auto-set travel date to today
+// auto-set travel date to today
 document.getElementById("travelDate").value =
-    new Date().toISOString().split("T")[0];
+  new Date().toISOString().split("T")[0];
 
-// STEP 1: Operator Continue
-document.getElementById("startBtn").addEventListener("click", () => {
-    const name = document.getElementById("operatorName").value.trim();
+function checkAndSave() {
 
-    if (!name) {
-        alert("Please enter operator name");
-        return;
-    }
+  const travelDate = new Date(document.getElementById("travelDate").value);
+  const expiryDate = new Date(document.getElementById("expiryDate").value);
+  const result = document.getElementById("result");
 
-    operator = name;
-    document.getElementById("operatorDisplay").textContent = operator;
+  const requiredDate = new Date(travelDate);
+  requiredDate.setMonth(requiredDate.getMonth() + 6);
 
-    document.getElementById("operatorName").style.display = "none";
-    document.getElementById("startBtn").style.display = "none";
-    document.getElementById("formSection").classList.remove("hidden");
-});
+  let validityStatus = "INVALID";
 
-// STEP 2: Check validity & save
-document.getElementById("checkBtn").addEventListener("click", () => {
+  if (expiryDate >= requiredDate) {
+    validityStatus = "VALID";
+    result.textContent = "Passport is VALID ✅";
+    result.className = "result valid";
+  } else {
+    result.textContent = "Passport is NOT valid ❌";
+    result.className = "result invalid";
+  }
 
-    const travelDateVal = document.getElementById("travelDate").value;
-    const expiryDateVal = document.getElementById("expiryDate").value;
-    const result = document.getElementById("result");
+  const data = {
+    enteredBy: document.getElementById("enteredBy").value,
+    firstName: document.getElementById("firstName").value,
+    lastName: document.getElementById("lastName").value,
+    passportNumber: document.getElementById("passportNumber").value,
+    travelDate: document.getElementById("travelDate").value,
+    expiryDate: document.getElementById("expiryDate").value,
+    validity: validityStatus
+  };
 
-    if (!expiryDateVal) {
-        result.textContent = "Please enter passport expiry date";
-        result.className = "result invalid";
-        return;
-    }
-
-    const travelDateObj = new Date(travelDateVal);
-    const expiryDateObj = new Date(expiryDateVal);
-
-    const requiredDate = new Date(travelDateObj);
-    requiredDate.setMonth(requiredDate.getMonth() + 6);
-
-    const validity =
-        expiryDateObj >= requiredDate ? "VALID" : "INVALID";
-
-    result.textContent =
-        validity === "VALID"
-            ? "Passport is VALID ✅ (Data saved)"
-            : "Passport is NOT valid ❌ (Data saved)";
-
-    result.className =
-        validity === "VALID" ? "result valid" : "result invalid";
-
-    // 🔥 SEND DATA USING FORMDATA
-    const formData = new FormData();
-    formData.append("operator", operator);
-    formData.append("firstName", firstName.value);
-    formData.append("lastName", lastName.value);
-    formData.append("passportNumber", passportNo.value);
-    formData.append("travelDate", travelDateVal);
-    formData.append("expiryDate", expiryDateVal);
-    formData.append("validity", validity);
-    formData.append("timestamp", new Date().toISOString());
-
-    fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: formData
-    });
-});
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",   // ✅ FIXES CORS
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(() => {
+    console.log("Data sent to Google Sheet");
+  })
+  .catch(() => {
+    console.log("Fetch error (can be ignored due to no-cors)");
+  });
+}
 </script>
 
 </body>
