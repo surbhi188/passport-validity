@@ -14,10 +14,14 @@ body {
 .container {
   background: #ffffff;
   padding: 25px;
-  max-width: 500px;
+  max-width: 520px;
   margin: auto;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
 }
 
 label {
@@ -64,22 +68,22 @@ button {
 <h2>Passport Validity Checker</h2>
 
 <label>Entered By</label>
-<input type="text" id="enteredBy">
+<input type="text" id="enteredBy" required>
 
 <label>First Name</label>
-<input type="text" id="firstName">
+<input type="text" id="firstName" required>
 
 <label>Last Name</label>
-<input type="text" id="lastName">
+<input type="text" id="lastName" required>
 
 <label>Passport Number</label>
-<input type="text" id="passportNumber">
+<input type="text" id="passportNumber" required>
 
 <label>Travel Date</label>
 <input type="date" id="travelDate">
 
 <label>Passport Expiry Date</label>
-<input type="date" id="expiryDate">
+<input type="date" id="expiryDate" required>
 
 <button onclick="checkAndSave()">Check & Save</button>
 
@@ -87,56 +91,63 @@ button {
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
 
-// auto-set travel date to today
+// Auto-set travel date to today
 document.getElementById("travelDate").value =
   new Date().toISOString().split("T")[0];
 
 function checkAndSave() {
 
-  const travelDate = new Date(document.getElementById("travelDate").value);
-  const expiryDate = new Date(document.getElementById("expiryDate").value);
   const result = document.getElementById("result");
+
+  const travelDateVal = document.getElementById("travelDate").value;
+  const expiryDateVal = document.getElementById("expiryDate").value;
+
+  if (!expiryDateVal) {
+    result.textContent = "Please enter passport expiry date";
+    result.className = "result invalid";
+    return;
+  }
+
+  const travelDate = new Date(travelDateVal);
+  const expiryDate = new Date(expiryDateVal);
 
   const requiredDate = new Date(travelDate);
   requiredDate.setMonth(requiredDate.getMonth() + 6);
 
-  let validityStatus = "INVALID";
+  const validity =
+    expiryDate >= requiredDate ? "VALID" : "INVALID";
 
-  if (expiryDate >= requiredDate) {
-    validityStatus = "VALID";
-    result.textContent = "Passport is VALID ✅";
+  // Show result immediately (NO dependency on fetch)
+  if (validity === "VALID") {
+    result.textContent = "Passport is VALID ✅ (Data saved)";
     result.className = "result valid";
   } else {
-    result.textContent = "Passport is NOT valid ❌";
+    result.textContent = "Passport is NOT valid ❌ (Data saved)";
     result.className = "result invalid";
   }
 
-  const data = {
-    enteredBy: document.getElementById("enteredBy").value,
-    firstName: document.getElementById("firstName").value,
-    lastName: document.getElementById("lastName").value,
-    passportNumber: document.getElementById("passportNumber").value,
-    travelDate: document.getElementById("travelDate").value,
-    expiryDate: document.getElementById("expiryDate").value,
-    validity: validityStatus
-  };
-
+  // Fire-and-forget data save (CORS-safe)
   fetch(SCRIPT_URL, {
     method: "POST",
-    mode: "no-cors",   // ✅ FIXES CORS
+    mode: "no-cors",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(data)
-  })
-  .then(() => {
-    console.log("Data sent to Google Sheet");
-  })
-  .catch(() => {
-    console.log("Fetch error (can be ignored due to no-cors)");
+    body: JSON.stringify({
+      enteredBy: enteredBy.value,
+      firstName: firstName.value,
+      lastName: lastName.value,
+      passportNumber: passportNumber.value,
+      travelDate: travelDateVal,
+      expiryDate: expiryDateVal,
+      validity: validity,
+      timestamp: new Date().toISOString()
+    })
   });
+
 }
 </script>
 
