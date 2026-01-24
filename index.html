@@ -3,141 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <title>Passport Validity Checker</title>
-
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  padding: 40px;
-}
-
-.container {
-  background: #ffffff;
-  padding: 25px;
-  max-width: 500px;
-  margin: auto;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-label {
-  display: block;
-  margin-top: 12px;
-  font-weight: bold;
-}
-
-input, button {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-}
-
-button {
-  margin-top: 20px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.result {
-  margin-top: 15px;
-  padding: 10px;
-  text-align: center;
-  font-weight: bold;
-  border-radius: 5px;
-}
-
-.valid {
-  background: #d4edda;
-  color: #155724;
-}
-
-.invalid {
-  background: #f8d7da;
-  color: #721c24;
-}
+body { font-family: Arial; background: #f4f6f8; padding: 40px; }
+.container { background: #fff; padding: 25px; max-width: 550px; margin: auto; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+h2 { text-align: center; }
+label { display: block; margin-top: 12px; font-weight: bold; }
+input, button { width: 100%; padding: 8px; margin-top: 5px; }
+button { margin-top: 20px; cursor: pointer; }
+.hidden { display: none; }
+.result { margin-top: 15px; padding: 10px; text-align: center; font-weight: bold; }
+.valid { background: #d4edda; color: #155724; }
+.invalid { background: #f8d7da; color: #721c24; }
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<h2>Passport Validity Checker</h2>
+    <h2>Passport Validity Checker</h2>
 
-<label>Entered By</label>
-<input type="text" id="enteredBy">
+    <!-- Operator Input -->
+    <label>Operator Name</label>
+    <input type="text" id="operatorName" placeholder="Enter your name">
+    <button id="startBtn">Continue</button>
 
-<label>First Name</label>
-<input type="text" id="firstName">
-
-<label>Last Name</label>
-<input type="text" id="lastName">
-
-<label>Passport Number</label>
-<input type="text" id="passportNumber">
-
-<label>Travel Date</label>
-<input type="date" id="travelDate">
-
-<label>Passport Expiry Date</label>
-<input type="date" id="expiryDate">
-
-<button onclick="checkAndSave()">Check & Save</button>
-
-<div id="result" class="result"></div>
+    <!-- Passport Form -->
+    <div id="formSection" class="hidden">
+        <label>First Name</label><input type="text" id="firstName">
+        <label>Last Name</label><input type="text" id="lastName">
+        <label>Passport Number</label><input type="text" id="passportNo">
+        <label>Travel Date</label><input type="date" id="travelDate">
+        <label>Passport Expiry Date</label><input type="date" id="expiryDate">
+        <button id="checkBtn">Check & Save</button>
+        <div id="result" class="result"></div>
+    </div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
+const GOOGLE_SHEET_URL = "https://script.google.com/a/macros/gyanrachanatours.com/s/AKfycby8ka6_1PRxsK3mxc0hVUslfqN37ZwLQcD5pfqGTNyaIiM45rP_XiEn0lwQLqSG7SgOOQ/exec";
 
-// auto-set travel date to today
-document.getElementById("travelDate").value =
-  new Date().toISOString().split("T")[0];
+let operatorName = "";
+document.getElementById("startBtn").addEventListener("click", () => {
+    operatorName = document.getElementById("operatorName").value.trim();
+    if(!operatorName) { alert("Please enter operator name"); return; }
+    document.getElementById("formSection").classList.remove("hidden");
+});
 
-function checkAndSave() {
+// Auto-set travel date to today
+document.getElementById("travelDate").value = new Date().toISOString().split("T")[0];
 
-  const travelDate = new Date(document.getElementById("travelDate").value);
-  const expiryDate = new Date(document.getElementById("expiryDate").value);
-  const result = document.getElementById("result");
+document.getElementById("checkBtn").addEventListener("click", () => {
+    const fn = document.getElementById("firstName").value;
+    const ln = document.getElementById("lastName").value;
+    const pp = document.getElementById("passportNo").value;
+    const travel = document.getElementById("travelDate").value;
+    const expiry = document.getElementById("expiryDate").value;
+    const resultBox = document.getElementById("result");
 
-  const requiredDate = new Date(travelDate);
-  requiredDate.setMonth(requiredDate.getMonth() + 6);
+    if(!fn || !ln || !pp || !travel || !expiry) { alert("Please fill all fields"); return; }
 
-  let validityStatus = "INVALID";
+    const travelDate = new Date(travel);
+    const expiryDate = new Date(expiry);
+    const minValid = new Date(travelDate); minValid.setMonth(minValid.getMonth()+6);
 
-  if (expiryDate >= requiredDate) {
-    validityStatus = "VALID";
-    result.textContent = "Passport is VALID ✅";
-    result.className = "result valid";
-  } else {
-    result.textContent = "Passport is NOT valid ❌";
-    result.className = "result invalid";
-  }
+    let status = "";
+    if(expiryDate >= minValid){
+        status="VALID";
+        resultBox.textContent="Passport is VALID ✅"; resultBox.className="result valid";
+    } else {
+        status="INVALID";
+        resultBox.textContent="Passport is NOT valid ❌"; resultBox.className="result invalid";
+    }
 
-  const data = {
-    enteredBy: document.getElementById("enteredBy").value,
-    firstName: document.getElementById("firstName").value,
-    lastName: document.getElementById("lastName").value,
-    passportNumber: document.getElementById("passportNumber").value,
-    travelDate: document.getElementById("travelDate").value,
-    expiryDate: document.getElementById("expiryDate").value,
-    validity: validityStatus
-  };
-
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",   // ✅ FIXES CORS
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  })
-  .then(() => {
-    console.log("Data sent to Google Sheet");
-  })
-  .catch(() => {
-    console.log("Fetch error (can be ignored due to no-cors)");
-  });
-}
+    // Send to Google Sheet
+    fetch(GOOGLE_SHEET_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            operatorName, firstName: fn, lastName: ln, passportNo: pp,
+            travelDate: travel, expiryDate: expiry, result: status
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Saved to Google Sheet", data))
+    .catch(err => { console.error(err); alert("Failed to save data"); });
+});
 </script>
 
 </body>
