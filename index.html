@@ -100,7 +100,7 @@ button {
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxU4nSOyqpKOR-E4r-f_K0gOjs5xyUqvuIY8vI94aQzKS5RjAGlBEtaVeefGndrft57/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQhm6OxMjV9cq0_BOQerkqnGOUJF_UatCoEh2vn7NPAcBw7BdAS9BgZhqk8h-ZfzG6/exec";
 
 // Auto-set travel date to today
 document.getElementById("travelDate").value =
@@ -163,8 +163,8 @@ function checkAndSave() {
     body: formData
   });
 
-  alert("Data saved successfully ✅");
-
+  //alert("Data saved successfully ✅");
+console.log("Saved");
   // Clear form for next entry (operator stays)
   document.getElementById("firstName").value = "";
   document.getElementById("lastName").value = "";
