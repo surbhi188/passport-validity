@@ -100,8 +100,7 @@ button {
 </div>
 
 <script>
-const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
 
 // Auto-set travel date to today
 document.getElementById("travelDate").value =
@@ -148,7 +147,7 @@ function checkAndSave() {
     resultDiv.className = "result invalid";
   }
 
-  // Send data silently
+  // Send data (fire & forget)
   const formData = new FormData();
   formData.append("operator", operator);
   formData.append("firstName", firstName);
@@ -164,10 +163,9 @@ function checkAndSave() {
     body: formData
   });
 
-  // Soft confirmation (no popup)
-  resultDiv.innerHTML += "<br><small style='color:green'>Saved successfully ✔</small>";
+  alert("Data saved successfully ✅");
 
-  // Clear form for next entry
+  // Clear form for next entry (operator stays)
   document.getElementById("firstName").value = "";
   document.getElementById("lastName").value = "";
   document.getElementById("passportNo").value = "";
