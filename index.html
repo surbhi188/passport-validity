@@ -108,6 +108,7 @@ button {
 </div>
 
 <script>
+// ✅ Your Apps Script URL
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycby8upXPLdKsp9gah6RDMN2q5BpljWTZfTdYnUkvw6xSnUNuMSDsydydsIO37c5lGUg/exec";
 
@@ -129,7 +130,6 @@ document.getElementById("startBtn").addEventListener("click", () => {
     operator = name;
     document.getElementById("operatorDisplay").textContent = operator;
 
-    // Hide operator input, show form
     document.getElementById("operatorName").style.display = "none";
     document.getElementById("startBtn").style.display = "none";
     document.getElementById("formSection").classList.remove("hidden");
@@ -138,44 +138,48 @@ document.getElementById("startBtn").addEventListener("click", () => {
 // STEP 2: Check validity & save
 document.getElementById("checkBtn").addEventListener("click", () => {
 
-    const travelDate = new Date(document.getElementById("travelDate").value);
-    const expiryDate = new Date(document.getElementById("expiryDate").value);
+    const travelDateVal = document.getElementById("travelDate").value;
+    const expiryDateVal = document.getElementById("expiryDate").value;
     const result = document.getElementById("result");
 
-    if (!document.getElementById("expiryDate").value) {
+    if (!expiryDateVal) {
         result.textContent = "Please enter passport expiry date";
         result.className = "result invalid";
         return;
     }
 
-    const requiredDate = new Date(travelDate);
+    const travelDateObj = new Date(travelDateVal);
+    const expiryDateObj = new Date(expiryDateVal);
+
+    const requiredDate = new Date(travelDateObj);
     requiredDate.setMonth(requiredDate.getMonth() + 6);
 
-    const validity = expiryDate >= requiredDate ? "VALID" : "INVALID";
+    const validity =
+        expiryDateObj >= requiredDate ? "VALID" : "INVALID";
 
     result.textContent =
         validity === "VALID"
-        ? "Passport is VALID ✅ (Data saved)"
-        : "Passport is NOT valid ❌ (Data saved)";
+            ? "Passport is VALID ✅ (Data saved)"
+            : "Passport is NOT valid ❌ (Data saved)";
 
     result.className =
         validity === "VALID" ? "result valid" : "result invalid";
 
-    // Fire-and-forget save
+    // 🔥 SEND DATA USING FORMDATA
+    const formData = new FormData();
+    formData.append("operator", operator);
+    formData.append("firstName", firstName.value);
+    formData.append("lastName", lastName.value);
+    formData.append("passportNumber", passportNo.value);
+    formData.append("travelDate", travelDateVal);
+    formData.append("expiryDate", expiryDateVal);
+    formData.append("validity", validity);
+    formData.append("timestamp", new Date().toISOString());
+
     fetch(SCRIPT_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            operator: operator,
-            firstName: firstName.value,
-            lastName: lastName.value,
-            passportNumber: passportNo.value,
-            travelDate: travelDate.toISOString().split("T")[0],
-            expiryDate: expiryDate.toISOString().split("T")[0],
-            validity: validity,
-            timestamp: new Date().toISOString()
-        })
+        body: formData
     });
 });
 </script>
