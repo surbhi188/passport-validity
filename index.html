@@ -10,7 +10,6 @@ body {
   background: #f4f6f8;
   padding: 40px;
 }
-
 .container {
   background: #fff;
   padding: 25px;
@@ -19,48 +18,33 @@ body {
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
-
-h2 {
-  text-align: center;
-}
-
 label {
   display: block;
-  margin-top: 15px;
+  margin-top: 12px;
   font-weight: bold;
 }
-
-input {
+input, button {
   width: 100%;
   padding: 8px;
-  margin-top: 5px;
+  margin-top: 6px;
 }
-
 button {
   margin-top: 20px;
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
   cursor: pointer;
 }
-
 .hidden {
   display: none;
 }
-
 .result {
-  margin-top: 20px;
+  margin-top: 15px;
   padding: 10px;
-  font-weight: bold;
   text-align: center;
-  border-radius: 5px;
+  font-weight: bold;
 }
-
 .valid {
   background: #d4edda;
   color: #155724;
 }
-
 .invalid {
   background: #f8d7da;
   color: #721c24;
@@ -71,16 +55,14 @@ button {
 <body>
 
 <div class="container">
-  <h2>Passport Validity Checker</h2>
+  <h2 style="text-align:center;">Passport Validity Checker</h2>
 
-  <!-- STEP 1 -->
-  <div id="operatorSection">
-    <label>Operator Name</label>
-    <input type="text" id="operatorName" placeholder="Enter your name">
-    <button onclick="startForm()">Continue</button>
-  </div>
+  <!-- Operator -->
+  <label>Operator Name</label>
+  <input type="text" id="operatorName" placeholder="Enter operator name">
+  <button onclick="startForm()">Continue</button>
 
-  <!-- STEP 2 -->
+  <!-- Passport Form -->
   <div id="formSection" class="hidden">
     <label>First Name</label>
     <input type="text" id="firstName">
@@ -105,19 +87,18 @@ button {
 
 <script>
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzhTPgCRy299l2euNFRZZ5ObIBAfgJbGiRLoq1c2waJwQ7x96RVwFD-lizipDnq2THN/exec";
+"https://script.google.com/macros/s/AKfycbyUHoW-f9ZeBJ1C3ZSvTKVSAzA_y-Bh2pXJcjQr_sdp9IMufp71DX0Vc4H20KFlv9yE/exec";
 
-// Auto set travel date
+// default travel date = today
 document.getElementById("travelDate").value =
   new Date().toISOString().split("T")[0];
 
 function startForm() {
   const operator = document.getElementById("operatorName").value.trim();
   if (!operator) {
-    alert("Please enter Operator Name");
+    alert("Please enter operator name");
     return;
   }
-  document.getElementById("operatorSection").classList.add("hidden");
   document.getElementById("formSection").classList.remove("hidden");
 }
 
@@ -137,12 +118,11 @@ function checkAndSave() {
 
   const travel = new Date(travelDate);
   const expiry = new Date(expiryDate);
-  const required = new Date(travel);
-  required.setMonth(required.getMonth() + 6);
+  const minValid = new Date(travel);
+  minValid.setMonth(minValid.getMonth() + 6);
 
   let validity = "";
-
-  if (expiry >= required) {
+  if (expiry >= minValid) {
     validity = "VALID";
     resultDiv.textContent = "Passport is VALID ✅";
     resultDiv.className = "result valid";
@@ -152,7 +132,7 @@ function checkAndSave() {
     resultDiv.className = "result invalid";
   }
 
-  // SEND DATA TO GOOGLE SHEET (FormData)
+  // 🔥 FIRE & FORGET (NO CORS)
   const formData = new FormData();
   formData.append("operator", operator);
   formData.append("firstName", firstName);
@@ -164,16 +144,13 @@ function checkAndSave() {
 
   fetch(SCRIPT_URL, {
     method: "POST",
+    mode: "no-cors",
     body: formData
-  })
-  .then(() => {
-    console.log("Saved successfully");
-  })
-  .catch(() => {
-    console.log("Save failed");
   });
 
-  // Clear form (keep operator)
+  console.log("Data sent to Google Sheet");
+
+  // reset fields
   document.getElementById("firstName").value = "";
   document.getElementById("lastName").value = "";
   document.getElementById("passportNo").value = "";
