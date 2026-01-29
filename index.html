@@ -142,12 +142,15 @@ function checkAndSave() {
   formData.append("expiryDate", expiryDate);
   formData.append("validity", validity);
 
+  try {
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
     body: formData
   });
-
+} catch (e) {
+  // intentionally empty
+}
   console.log("Data sent to Google Sheet");
 
   // reset fields
