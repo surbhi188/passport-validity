@@ -70,6 +70,10 @@ button {
     <label>Last Name</label>
     <input type="text" id="lastName">
 
+    <!-- ✅ DOB ADDED -->
+    <label>Date of Birth</label>
+    <input type="date" id="dob">
+
     <label>Passport Number</label>
     <input type="text" id="passportNo">
 
@@ -106,12 +110,13 @@ function checkAndSave() {
   const operator = document.getElementById("operatorName").value.trim();
   const firstName = document.getElementById("firstName").value.trim();
   const lastName = document.getElementById("lastName").value.trim();
+  const dob = document.getElementById("dob").value;   // ✅ DOB
   const passportNo = document.getElementById("passportNo").value.trim();
   const travelDate = document.getElementById("travelDate").value;
   const expiryDate = document.getElementById("expiryDate").value;
   const resultDiv = document.getElementById("result");
 
-  if (!firstName || !lastName || !passportNo || !travelDate || !expiryDate) {
+  if (!firstName || !lastName || !dob || !passportNo || !travelDate || !expiryDate) {
     alert("Please fill all fields");
     return;
   }
@@ -137,25 +142,28 @@ function checkAndSave() {
   formData.append("operator", operator);
   formData.append("firstName", firstName);
   formData.append("lastName", lastName);
+  formData.append("dob", dob);                 // ✅ DOB SENT
   formData.append("passportNumber", passportNo);
   formData.append("travelDate", travelDate);
   formData.append("expiryDate", expiryDate);
   formData.append("validity", validity);
 
   try {
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: formData
-  });
-} catch (e) {
-  // intentionally empty
-}
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: formData
+    });
+  } catch (e) {
+    // intentionally empty
+  }
+
   console.log("Data sent to Google Sheet");
 
   // reset fields
   document.getElementById("firstName").value = "";
   document.getElementById("lastName").value = "";
+  document.getElementById("dob").value = "";
   document.getElementById("passportNo").value = "";
   document.getElementById("expiryDate").value = "";
 }
